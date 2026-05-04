@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
-import { Truck, Plus, List, Package } from "lucide-react";
+import { Truck, Plus, List, Package, DollarSign } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const customerLinks = [
@@ -14,6 +14,7 @@ const customerLinks = [
 const driverLinks = [
   { href: "/browse", label: "Browse Jobs", icon: Package },
   { href: "/my-hauls", label: "My Hauls", icon: Truck },
+  { href: "/earnings", label: "Earnings", icon: DollarSign },
 ];
 
 export default function Navbar({ role = "customer" }: { role?: "customer" | "driver" | "both" }) {

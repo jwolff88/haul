@@ -45,8 +45,8 @@ export default async function MyJobsPage() {
           </div>
         ) : (
           <div className="space-y-3">
-            {jobs.map((job) => (
-              <JobCard key={job.id} job={job as unknown as JobWithRelations} />
+            {(jobs as unknown as JobWithRelations[]).map((job) => (
+              <JobCard key={job.id} job={job} />
             ))}
           </div>
         )}

@@ -1,0 +1,122 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  CUSTOMER
+  DRIVER
+  BOTH
+}
+
+enum JobStatus {
+  OPEN
+  ACCEPTED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum JobSize {
+  SMALL
+  MEDIUM
+  LARGE
+  XLARGE
+}
+
+model User {
+  id        String   @id
+  email     String   @unique
+  name      String
+  phone     String?
+  role      UserRole @default(CUSTOMER)
+  avatarUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  jobsPosted    Job[]          @relation("CustomerJobs")
+  jobsAccepted  Job[]          @relation("DriverJobs")
+  driverProfile DriverProfile?
+  ratingsGiven  Rating[]       @relation("RatingsGiven")
+  ratingsRecv   Rating[]       @relation("RatingsReceived")
+}
+
+model DriverProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id])
+  vehicleType     String
+  vehicleYear     Int?
+  vehicleMake     String?
+  vehicleModel    String?
+  maxLoadWeight   Int?
+  hasPro          Boolean  @default(false)
+  stripeAccountId String?
+  isVerified      Boolean  @default(false)
+  isActive        Boolean  @default(true)
+  bio             String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Job {
+  id         String    @id @default(cuid())
+  customerId String
+  customer   User      @relation("CustomerJobs", fields: [customerId], references: [id])
+  driverId   String?
+  driver     User?     @relation("DriverJobs", fields: [driverId], references: [id])
+
+  title          String
+  description    String
+  size           JobSize
+  status         JobStatus @default(OPEN)
+
+  pickupAddress  String
+  pickupLat      Float?
+  pickupLng      Float?
+  dropoffAddress String
+  dropoffLat     Float?
+  dropoffLng     Float?
+  estimatedMiles Float?
+
+  offeredPrice  Float
+  platformFee   Float?
+  driverPayout  Float?
+
+  scheduledFor  DateTime?
+  acceptedAt    DateTime?
+  startedAt     DateTime?
+  completedAt   DateTime?
+
+  stripePaymentIntentId String?
+  stripeTransferId      String?
+
+  photoUrls String[] @default([])
+
+  ratings Rating[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([customerId])
+  @@index([driverId])
+}
+
+model Rating {
+  id        String   @id @default(cuid())
+  jobId     String
+  job       Job      @relation(fields: [jobId], references: [id])
+  raterId   String
+  rater     User     @relation("RatingsGiven", fields: [raterId], references: [id])
+  rateeId   String
+  ratee     User     @relation("RatingsReceived", fields: [rateeId], references: [id])
+  stars     Int
+  comment   String?
+  createdAt DateTime @default(now())
+
+  @@unique([jobId, raterId])
+}
